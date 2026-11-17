@@ -64,7 +64,7 @@ fun FinMatesApp() {
                 navController = navController,
                 startDestination = Screen.Splash.route
             ) {
-                // Layer 1: Splash & Onboarding
+
                 composable(Screen.Splash.route) {
                     SplashOnboardingScreen(
                         onStartClicked = {
@@ -140,9 +140,6 @@ fun FinMatesApp() {
                 composable(Screen.Riwayat.route) {
                     RiwayatTransaksiScreen(
                         viewModel = viewModel,
-                        onNavigateToAdd = {
-                            navController.navigate(Screen.TambahTransaksi.route)
-                        },
                         onNavigateToDetail = { id ->
                             navController.navigate(Screen.DetailTransaksi.createRoute(id))
                         },

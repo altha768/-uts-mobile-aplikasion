@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -22,83 +23,132 @@ fun MatesScreen(
     viewModel: FinMatesViewModel,
     onNavigateToSplitBill: () -> Unit,
     onNavigate: (String) -> Unit,
-    currentRoute: String
+    currentRoute: String,
 ) {
     val mates = viewModel.mates.value
-    val localeID = Locale("id", "ID")
-
-    val totalOwed = mates.filter { it.isOwedByMe }.sumOf { it.amount }
-    val totalLending = mates.filter { !it.isOwedByMe }.sumOf { it.amount }
+    val localeID = Locale.forLanguageTag("id-ID")
 
     Scaffold(
         bottomBar = {
-            FinMatesBottomNav(currentRoute = currentRoute, onNavigate = onNavigate)
+            FinMatesBottomNav(
+                currentRoute = currentRoute,
+                onNavigate = onNavigate,
+            )
         },
-        containerColor = Color(0xFFFAFAFA)
+        containerColor = Color(0xFFFAFAFA),
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues),
         ) {
-            // Header
+            // Header with avatars in top right
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(FinGreenPrimary)
-                    .padding(20.dp)
+                    .background(Color.White)
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
             ) {
-                Text(
-                    text = "Mates",
-                    color = Color.White,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "Mates",
+                        color = Color(0xFF111111),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+
+                    // Avatar bubbles (B, D, R)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy((-6).dp),
+                    ) {
+                        listOf(
+                            Triple("B", Color(0xFF1565C0), Color.White),
+                            Triple("D", Color(0xFF8D6E63), Color.White),
+                            Triple("R", Color(0xFF512DA8), Color.White),
+                        ).forEach { (initial, bg, fg) ->
+                            Box(
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .background(bg, CircleShape),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(initial, color = fg, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
             }
 
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 item {
-                    // Summary cards
+                    Spacer(modifier = Modifier.height(4.dp))
+                    // Summary cards with action buttons (Bayar & Ingatkan)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         Card(
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFFD9534F)),
-                            shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier.weight(1f)
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier.weight(1f),
                         ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text(text = "Kamu ditagih", color = Color.White.copy(alpha = 0.9f), fontSize = 12.sp)
-                                Spacer(modifier = Modifier.height(4.dp))
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Text(text = "Kamu ditagih", fontSize = 12.sp, color = Color(0xFF777777))
                                 Text(
-                                    text = "Rp ${String.format(localeID, "%,.0f", totalOwed).replace(',', '.')}",
-                                    color = Color.White,
+                                    text = "Rp 15.000",
                                     fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFFD9534F),
                                 )
+                                Button(
+                                    onClick = { /* Bayar action */ },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD9534F)),
+                                    shape = RoundedCornerShape(8.dp),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                                    modifier = Modifier.height(32.dp),
+                                ) {
+                                    Text(text = "Bayar", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                }
                             }
                         }
 
                         Card(
-                            colors = CardDefaults.cardColors(containerColor = FinGreenPrimary),
-                            shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier.weight(1f)
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier.weight(1f),
                         ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text(text = "Kamu menagih", color = Color.White.copy(alpha = 0.9f), fontSize = 12.sp)
-                                Spacer(modifier = Modifier.height(4.dp))
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Text(text = "Kamu menagih", fontSize = 12.sp, color = Color(0xFF777777))
                                 Text(
-                                    text = "Rp ${String.format(localeID, "%,.0f", totalLending).replace(',', '.')}",
-                                    color = Color.White,
+                                    text = "Rp 120.000",
                                     fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    color = FinGreenPrimary,
                                 )
+                                Button(
+                                    onClick = { /* Ingatkan action */ },
+                                    colors = ButtonDefaults.buttonColors(containerColor = FinGreenPrimary),
+                                    shape = RoundedCornerShape(8.dp),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                                    modifier = Modifier.height(32.dp),
+                                ) {
+                                    Text(text = "Ingatkan", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                }
                             }
                         }
                     }
@@ -106,35 +156,69 @@ fun MatesScreen(
 
                 item {
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = "Aktivitas", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF222222))
+                    Text(
+                        text = "Aktivitas",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF222222),
+                    )
                 }
 
                 items(mates) { mate ->
                     Card(
                         colors = CardDefaults.cardColors(containerColor = Color.White),
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Column {
-                                Text(text = mate.name, fontSize = 15.sp, fontWeight = FontWeight.Medium, color = Color(0xFF222222))
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(text = mate.date, fontSize = 12.sp, color = Color(0xFF777777))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = Color(0xFFF0F4F1),
+                                    modifier = Modifier.size(40.dp),
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text(
+                                            text = when {
+                                                mate.name.contains("Galon", true) -> "💧"
+                                                mate.name.contains("Nasi", true) -> "🍛"
+                                                else -> "⚡"
+                                            },
+                                            fontSize = 18.sp,
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column {
+                                    Text(
+                                        text = mate.name,
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = Color(0xFF222222),
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = mate.date,
+                                        fontSize = 12.sp,
+                                        color = Color(0xFF777777),
+                                    )
+                                }
                             }
+
                             val prefix = if (mate.isOwedByMe) "-" else "+"
-                            val color = if (mate.isOwedByMe) Color(0xFFD9534F) else Color(0xFF5CB85C)
+                            val color = if (mate.isOwedByMe) Color(0xFFD9534F) else FinGreenPrimary
                             val formattedAmount = "$prefix${String.format(localeID, "%,.0f", mate.amount).replace(',', '.')}"
                             Text(
                                 text = formattedAmount,
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = color
+                                color = color,
                             )
                         }
                     }
@@ -146,30 +230,17 @@ fun MatesScreen(
                         onClick = onNavigateToSplitBill,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(48.dp),
+                            .height(50.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = FinGreenPrimary),
-                        shape = RoundedCornerShape(10.dp)
+                        shape = RoundedCornerShape(12.dp),
                     ) {
-                        Text(text = "+ Bagi Tagihan", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        Text(text = "Bagi Tagihan", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFEBF3EF)),
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Text(
-                            text = "Native: Push Notifications (Siap mengirim notifikasi ke teman)",
-                            color = FinGreenPrimary,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.padding(14.dp)
-                        )
-                    }
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
     }
 }
+

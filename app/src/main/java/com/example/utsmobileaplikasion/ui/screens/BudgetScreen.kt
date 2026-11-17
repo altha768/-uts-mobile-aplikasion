@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -21,79 +22,197 @@ import java.util.Locale
 fun BudgetScreen(
     viewModel: FinMatesViewModel,
     onNavigate: (String) -> Unit,
-    currentRoute: String
+    currentRoute: String,
 ) {
     val budgets = viewModel.budgets.value
-    val localeID = Locale("id", "ID")
+    val localeID = Locale.forLanguageTag("id-ID")
+
+    val totalSpent = budgets.sumOf { it.spent }
+    val totalLimit = budgets.sumOf { it.limit }
+    val overallPercentage = if (totalLimit > 0) ((totalSpent / totalLimit) * 100).toInt() else 0
 
     Scaffold(
         bottomBar = {
-            FinMatesBottomNav(currentRoute = currentRoute, onNavigate = onNavigate)
+            FinMatesBottomNav(
+                currentRoute = currentRoute,
+                onNavigate = onNavigate,
+            )
         },
-        containerColor = Color(0xFFFAFAFA)
+        containerColor = Color(0xFFFAFAFA),
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues),
         ) {
-            // Header
+            // Header with month and + Kategori button
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(FinGreenPrimary)
-                    .padding(20.dp)
+                    .background(Color.White)
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
             ) {
-                Text(
-                    text = "Budget Bulanan",
-                    color = Color.White,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column {
+                        Text(
+                            text = "Budget",
+                            color = Color(0xFF111111),
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "November 2026",
+                            fontSize = 12.sp,
+                            color = Color(0xFF777777),
+                        )
+                    }
+
+                    Button(
+                        onClick = { /* Add category */ },
+                        colors = ButtonDefaults.buttonColors(containerColor = FinGreenPrimary),
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                        modifier = Modifier.height(34.dp),
+                    ) {
+                        Text(text = "+ Kategori", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    }
+                }
             }
 
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
+                item {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    // Summary Progress Card (70%, Terpakai Rp 1.055.000 dari Rp 1.500.000)
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        shape = RoundedCornerShape(20.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Terpakai Rp ${String.format(localeID, "%,.0f", totalSpent).replace(',', '.')}",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF111111),
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "dari Rp ${String.format(localeID, "%,.0f", totalLimit).replace(',', '.')}",
+                                    fontSize = 13.sp,
+                                    color = Color(0xFF777777),
+                                )
+                            }
+
+                            // Circular Progress Indicator mockup
+                            Box(
+                                modifier = Modifier
+                                    .size(60.dp)
+                                    .background(FinGreenPrimary.copy(alpha = 0.15f), CircleShape),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    text = "$overallPercentage%",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = FinGreenPrimary,
+                                )
+                            }
+                        }
+                    }
+                }
+
                 items(budgets) { budget ->
                     Card(
                         colors = CardDefaults.cardColors(containerColor = Color.White),
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                Text(
-                                    text = budget.categoryName,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF222222)
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = Color(0xFFF0F4F1),
+                                        modifier = Modifier.size(36.dp),
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text(
+                                                text = when (budget.categoryName.lowercase()) {
+                                                    "makan" -> "🍜"
+                                                    "transport" -> "🚗"
+                                                    "hiburan" -> "🎬"
+                                                    "kos" -> "🏠"
+                                                    else -> "💡"
+                                                },
+                                                fontSize = 16.sp,
+                                            )
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Column {
+                                        Text(
+                                            text = budget.categoryName,
+                                            fontSize = 15.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFF222222),
+                                        )
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        val spentStr = String.format(localeID, "%,.0f", budget.spent).replace(',', '.')
+                                        val limitStr = String.format(localeID, "%,.0f", budget.limit).replace(',', '.')
+                                        Text(
+                                            text = "Rp $spentStr / Rp $limitStr",
+                                            fontSize = 12.sp,
+                                            color = Color(0xFF777777),
+                                        )
+                                    }
+                                }
+
                                 if (budget.isLunas) {
+                                    Surface(
+                                        shape = RoundedCornerShape(8.dp),
+                                        color = Color(0xFFE8F5E9),
+                                    ) {
+                                        Text(
+                                            text = "Lunas",
+                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = FinGreenPrimary,
+                                        )
+                                    }
+                                } else {
+                                    val percent = if (budget.limit > 0) ((budget.spent / budget.limit) * 100).toInt() else 0
                                     Text(
-                                        text = "Lunas",
+                                        text = "$percent%",
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = FinGreenPrimary
-                                    )
-                                } else {
-                                    val spentStr = String.format(localeID, "%,.0f", budget.spent).replace(',', '.')
-                                    val limitStr = String.format(localeID, "%,.0f", budget.limit).replace(',', '.')
-                                    Text(
-                                        text = "Rp $spentStr / Rp $limitStr",
-                                        fontSize = 13.sp,
-                                        color = Color(0xFF666666)
+                                        color = if (percent >= 90) Color(0xFFD9534F) else Color(0xFF555555),
                                     )
                                 }
                             }
@@ -104,23 +223,24 @@ fun BudgetScreen(
                                     progress = { progress },
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(8.dp),
-                                    color = if (progress > 0.9f) Color(0xFFD9534F) else FinGreenPrimary,
-                                    trackColor = Color(0xFFE0E0E0),
+                                        .height(6.dp),
+                                    color = if (progress >= 0.9f) Color(0xFFD9534F) else FinGreenPrimary,
+                                    trackColor = Color(0xFFF0F0F0),
                                 )
                             }
 
                             if (budget.warningMessage != null) {
-                                Card(
-                                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFCF8E3)),
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = Color(0xFFFFF8E1),
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(6.dp)
                                 ) {
                                     Text(
-                                        text = budget.warningMessage ?: "",
-                                        color = Color(0xFF8A6D3B),
+                                        text = "⚠️ ${budget.warningMessage}",
+                                        color = Color(0xFF8F6B00),
                                         fontSize = 12.sp,
-                                        modifier = Modifier.padding(10.dp)
+                                        fontWeight = FontWeight.Medium,
+                                        modifier = Modifier.padding(10.dp),
                                     )
                                 }
                             }
@@ -129,36 +249,10 @@ fun BudgetScreen(
                 }
 
                 item {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Button(
-                        onClick = { /* Add category action */ },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = FinGreenPrimary),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Text(text = "+ Kategori Baru", fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // Native feature mockup banner
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFEBF3EF)),
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Text(
-                            text = "Native: Push Notifications (Aktif - Peringatan 90%)",
-                            color = FinGreenPrimary,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.padding(14.dp)
-                        )
-                    }
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
     }
 }
+
